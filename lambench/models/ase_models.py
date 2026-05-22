@@ -398,7 +398,9 @@ class ASEModel(BaseLargeAtomModel):
                                 }
                             )
                         elif model.model_family == "DP":
-                            if getattr(model.model_metadata, "use_separate_spin_charge", False):
+                            if getattr(
+                                model.model_metadata, "use_separate_spin_charge", False
+                            ):
                                 atoms.info.update({"charge_spin": frame.data["fparam"]})
                             else:
                                 atoms.info.update({"fparam": frame.data["fparam"]})
