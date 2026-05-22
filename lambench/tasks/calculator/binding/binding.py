@@ -39,7 +39,11 @@ def run_inference(
             for atoms in (site, drug, combo):
                 atoms.calc = calc
                 atoms.info.update(
-                    {"charge_spin": np.array([atoms.info["charge"], atoms.info["spin"]])}
+                    {
+                        "charge_spin": np.array(
+                            [atoms.info["charge"], atoms.info["spin"]]
+                        )
+                    }
                 )
                 atoms.info.update(
                     {"fparam": np.array([atoms.info["charge"], atoms.info["spin"]])}
