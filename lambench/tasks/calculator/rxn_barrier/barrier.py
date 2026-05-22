@@ -58,6 +58,13 @@ def run_inference(
                 ].index.values[0]
                 atoms = traj[structure_index]
                 atoms.info.update(
+                    {
+                        "charge_spin": np.array(
+                            [atoms.info["charge"], atoms.info["spin"]]
+                        )
+                    }
+                )
+                atoms.info.update(
                     {"fparam": np.array([atoms.info["charge"], atoms.info["spin"]])}
                 )
                 atoms.calc = calc

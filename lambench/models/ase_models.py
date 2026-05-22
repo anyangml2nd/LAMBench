@@ -398,6 +398,7 @@ class ASEModel(BaseLargeAtomModel):
                                 }
                             )
                         elif model.model_family == "DP":
+                            atoms.info.update({"charge_spin": frame.data["fparam"]})
                             atoms.info.update({"fparam": frame.data["fparam"]})
                     atoms.calc = calc
 
