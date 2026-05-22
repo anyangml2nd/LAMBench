@@ -38,16 +38,18 @@ def run_inference(
         try:
             for atoms in (site, drug, combo):
                 atoms.calc = calc
-                atoms.info.update(
-                    {
-                        "charge_spin": np.array(
-                            [atoms.info["charge"], atoms.info["spin"]]
-                        )
-                    }
-                )
-                atoms.info.update(
-                    {"fparam": np.array([atoms.info["charge"], atoms.info["spin"]])}
-                )
+                if getattr(model.model_metadata, "use_separate_spin_charge", False):
+                    atoms.info.update(
+                        {
+                            "charge_spin": np.array(
+                                [atoms.info["charge"], atoms.info["spin"]]
+                            )
+                        }
+                    )
+                else:
+                    atoms.info.update(
+                        {"fparam": np.array([atoms.info["charge"], atoms.info["spin"]])}
+                    )
 
             site_energy = site.get_potential_energy()
             drug_energy = drug.get_potential_energy()
