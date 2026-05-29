@@ -58,7 +58,7 @@ from scipy.signal import find_peaks
 from lambench.models.ase_models import ASEModel
 
 _LABEL_FILE = Path(__file__).parent / "diatomics.json"
-_MIN_PROMINENCE = 0.01     # eV — genuine well depth threshold for find_peaks
+_MIN_PROMINENCE = 0.01  # eV — genuine well depth threshold for find_peaks
 
 
 def _element_from_name(mol_name: str) -> str:
@@ -78,7 +78,9 @@ def _minima_positions(energies: np.ndarray, bond_lengths: np.ndarray) -> list[fl
     return bond_lengths[valid_mask][idx_valid].tolist()
 
 
-def _min_position_error(pos_dft: list[float], pos_model: list[float], r_range: float) -> float:
+def _min_position_error(
+    pos_dft: list[float], pos_model: list[float], r_range: float
+) -> float:
     """
     Position error of the single equilibrium minimum (Å).
 
@@ -109,7 +111,9 @@ def _compute_roughness(residuals: np.ndarray, dr: float) -> float | None:
     return float(np.sqrt(np.mean((valid / dr**2) ** 2)))
 
 
-def _predict_energies(model: ASEModel, element: str, bond_lengths: np.ndarray) -> np.ndarray:
+def _predict_energies(
+    model: ASEModel, element: str, bond_lengths: np.ndarray
+) -> np.ndarray:
     """Evaluate model energy for a homonuclear dimer at each bond length (eV)."""
     calc = model.calc
     cell = 30.0
@@ -152,7 +156,7 @@ def run_inference(model: ASEModel, test_data: Path | None = None) -> dict[str, d
                 ...
             }
     """
-    label_path = (_LABEL_FILE if test_data is None else test_data / "diatomics.json")
+    label_path = _LABEL_FILE if test_data is None else test_data / "diatomics.json"
 
     with open(label_path) as fh:
         reference_data: list[dict] = json.load(fh)

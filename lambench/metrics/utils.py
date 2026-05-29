@@ -193,11 +193,15 @@ def aggregated_diatomics_results(results: dict[str, dict]) -> dict[str, float]:
         }
 
     avg_roughness = float(np.mean(roughness_values))
-    avg_norm_pos_err = float(np.mean(normalized_pos_err_values)) if normalized_pos_err_values else 0.0
+    avg_norm_pos_err = (
+        float(np.mean(normalized_pos_err_values)) if normalized_pos_err_values else 0.0
+    )
     return {
         "combined_roughness": float(avg_roughness * (1 + avg_norm_pos_err)),
         "avg_roughness": avg_roughness,
-        "avg_min_position_error": float(np.mean(position_error_values)) if position_error_values else None,
+        "avg_min_position_error": float(np.mean(position_error_values))
+        if position_error_values
+        else None,
         "avg_rmse": float(np.mean(rmse_values)) if rmse_values else None,
     }
 
