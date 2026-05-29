@@ -151,6 +151,57 @@ def aggregated_inference_efficiency_results(
     }
 
 
+def aggregated_diatomics_results(results: dict[str, dict]) -> dict[str, float]:
+    """
+    Aggregate per-molecule diatomics results into summary applicability metrics.
+
+    Leaderboard metric:
+        combined_roughness: avg_roughness × (1 + avg(min_pos_err / r_range))
+                            Multiplicative penalty couples smoothness with position accuracy.
+                            min_pos_err / r_range ∈ [0, 1], no free parameters.
+
+    Stored diagnostic metrics (not used for ranking):
+        avg_roughness:          arithmetic mean of per-molecule RMSE(d²residual/dr²) (eV/Å²).
+        avg_min_position_error: arithmetic mean of per-molecule |r_model_min - r_dft_min| (Å).
+                                Molecules without exactly one minimum contribute r_range as penalty.
+        avg_rmse:               arithmetic mean of per-molecule energy RMSE (eV).
+    """
+    roughness_values = []
+    normalized_pos_err_values = []
+    position_error_values = []
+    rmse_values = []
+
+    for mol_results in results.values():
+        if mol_results is None:
+            continue
+        if mol_results.get("roughness") is not None:
+            roughness_values.append(mol_results["roughness"])
+        r_range = mol_results.get("r_range")
+        min_pos_err = mol_results.get("min_position_error")
+        if min_pos_err is not None and r_range is not None and r_range > 0:
+            normalized_pos_err_values.append(min_pos_err / r_range)
+            position_error_values.append(min_pos_err)
+        if mol_results.get("rmse") is not None:
+            rmse_values.append(mol_results["rmse"])
+
+    if not roughness_values:
+        return {
+            "combined_roughness": None,
+            "avg_roughness": None,
+            "avg_min_position_error": None,
+            "avg_rmse": None,
+        }
+
+    avg_roughness = float(np.mean(roughness_values))
+    avg_norm_pos_err = float(np.mean(normalized_pos_err_values)) if normalized_pos_err_values else 0.0
+    return {
+        "combined_roughness": float(avg_roughness * (1 + avg_norm_pos_err)),
+        "avg_roughness": avg_roughness,
+        "avg_min_position_error": float(np.mean(position_error_values)) if position_error_values else None,
+        "avg_rmse": float(np.mean(rmse_values)) if rmse_values else None,
+    }
+
+
 ####################################
 # Visualization utility functions #
 ####################################

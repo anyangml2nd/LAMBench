@@ -16,6 +16,7 @@ from lambench.metrics.utils import (
     exp_average,
     aggregated_nve_md_results,
     aggregated_inference_efficiency_results,
+    aggregated_diatomics_results,
     get_leaderboard_models,
 )
 
@@ -172,6 +173,10 @@ def process_applicability_task_for_one_model(model: BaseLargeAtomModel):
         elif record.task_name == "inference_efficiency":
             applicability_results[record.task_name] = (
                 aggregated_inference_efficiency_results(record.metrics)
+            )
+        elif record.task_name == "homonuclear_diatomics":
+            applicability_results[record.task_name] = aggregated_diatomics_results(
+                record.metrics
             )
     return applicability_results
 

@@ -197,6 +197,21 @@ class MetricsCalculator:
             else:
                 return np.clip(np.log10(slope / lambda_0), a_min=0, a_max=None)
 
+    def calculate_diatomics_roughness_results(self) -> dict[str, float]:
+        """
+        Returns per-model leaderboard scores for the homonuclear diatomics task.
+
+        Score = combined_roughness = avg_roughness × (1 + avg(min_pos_err/r_range)), lower is better.
+        Diagnostic metrics (avg_roughness, avg_min_position_error, avg_rmse) stored in DB but not ranked.
+        Models with missing results are excluded.
+        """
+        raw = self.fetcher.fetch_diatomics_results()
+        return {
+            model: metrics["combined_roughness"]
+            for model, metrics in raw.items()
+            if metrics is not None and metrics.get("combined_roughness") is not None
+        }
+
     def calculate_efficiency_results(self) -> dict[str, float]:
         efficiency_results = self.fetcher.fetch_inference_efficiency_results()
         # filter out models with missing efficiency results
@@ -223,6 +238,7 @@ class MetricsCalculator:
         )
         stability_results = self.calculate_stability_results()
         efficiency_results = self.calculate_efficiency_results()
+        roughness_results = self.calculate_diatomics_roughness_results()
         if not generalizability_ood or not generalizability_downstream:
             logging.warning(
                 "Missing data for generalizability metrics (ood or downstream)"
@@ -255,6 +271,9 @@ class MetricsCalculator:
             "Applicability-Efficiency ↑": [
                 efficiency_results[model] for model in shared_models
             ],
+            "Applicability-Roughness ↓": [
+                roughness_results.get(model) for model in shared_models
+            ],
         }
 
         # Create DataFrame with models as index
@@ -273,8 +292,9 @@ class MetricsCalculator:
                 "Generalizability-PC Error ↓",
                 "Applicability-Instability ↓",
                 "Applicability-Efficiency ↑",
+                "Applicability-Roughness ↓",
             ],
-            ascending=[True, True, True, False],
+            ascending=[True, True, True, False, True],
         )
         print(
             "Final Rankings:\n",
